@@ -61,7 +61,7 @@ app.use('/updateprofile',UpdateProfile);
 app.use('/getbanks',GetBanks);
 app.use('/changepassword',ChangePassword);
 app.use("/api/payment/", paymentRoutes);
-app.use("/history",History);
+app.use("/historypay",History);
 
 app.use("/admin/login",AdminLogin);
 app.use("/admin/authadmin",AuthAdmin);

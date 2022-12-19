@@ -7,8 +7,8 @@ const controllerHistory = require('../controller/controllerHistory.js');
 const verifyToken = (req, res, next) => {
 
   const Bearer = req.headers["authorization"];
-  if (Bearer===undefined || Bearer.trim()==='') {
-      res.json({ message: "AUTH_FAILED" });
+  if (Bearer === undefined || Bearer.trim()==='') {
+      res.json({ message: "AUTH_FAILEDED" });
       return;
   }
     const token = Bearer.split(" ")[1];
