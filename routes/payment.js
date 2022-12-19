@@ -1,12 +1,17 @@
 const router = require("express").Router();
 const { PaymentModel } = require("../model/signupModel");
 const Jwt = require("jsonwebtoken");
-const jwtKey = "MYKEY";
+const jwtKey = process.env.SIGN_UP_SECRET_KEY;
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
 const verifyToken = (req, res, next) => {
+
   const Bearer = req.headers["authorization"];
+    if (Bearer===undefined || Bearer.trim()==='') {
+        res.json({ message: "AUTH_FAILED" });
+        return;
+    }
   const token = Bearer.split(" ")[1];
   Jwt.verify(token, jwtKey, (err, authData) => {
     if (err) {
@@ -21,8 +26,8 @@ const verifyToken = (req, res, next) => {
 router.post("/orders", verifyToken, async (req, res) => {
   try {
     const instance = new Razorpay({
-      key_id: "rzp_live_OEtqVhgDuLje5D",
-      key_secret: "l8D1KhF9g0JRDubt9gXitBUJ",
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
     const options = {
@@ -51,29 +56,26 @@ router.post("/verify", verifyToken, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, notes, id, } = req.body;
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSign = crypto
-      .createHmac("sha256", "l8D1KhF9g0JRDubt9gXitBUJ")
-      .update(sign.toString())
-      .digest("hex");
+    const expectedSign = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(sign.toString()).digest("hex");
 
     if (razorpay_signature === expectedSign) {
-      // here we have onject named notes:
-      // userId:String,
-      // name: String,
-      // bank_account:String,
-      // ifsc:String,
-      // mobile: String,
-      // amount:String,
-      // paymentCreatedAt: String,
-      //name, mobile, amount, bank_account, ifsc and in a req.body.id we have id of that user
-      const { name, mobile, amount, bank_account, ifsc } = notes;
+    
+      const { name, mobile, amount, bank_account, ifsc,upi,purpose } = notes;
+      // if (amount<100) {
+      //   res.json({ message: "Internal Server Error!", auth: false });
+      //   return;
+      // }
       const data = new PaymentModel({
         userId: id,
         name: name,
         bank_account: bank_account,
+        upi:upi,
         ifsc: ifsc,
         mobile: mobile,
-        amount: amount, 
+        amount: amount,
+        purpose:purpose,
+        paymentCreatedAt:new Date().getTime(),
+        orderId:razorpay_order_id,
 	});
       const result = await data.save();
       return res

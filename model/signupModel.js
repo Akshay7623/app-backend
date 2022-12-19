@@ -14,17 +14,28 @@ const newSignupShema = new mongoose.Schema({
   }
 });
 
+const AdminLogin = new mongoose.Schema({
+  useremail:String,
+  password:String
+});
+
+
 const PaymentSchema = new mongoose.Schema({
   userId:String,
+  methodType:String,
   name: String,
   bank_account:String,
   ifsc:String,
   mobile: String,
   amount:String,
-  paymentCreatedAt: {
-    type:String,
-    default:new Date().toString()
+  orderId:String,
+  upi:String,
+  purpose:String,
+  isPaid:{
+    type:Number,
+    default:0
   },
+  paymentCreatedAt:Number,
 });
 
 const signupSchema = new mongoose.Schema({
@@ -54,6 +65,8 @@ const AddBankSchema = new mongoose.Schema({
   account: String,
   mobile:String,
   email:String,
+  AddedBankAt:Number,
+  accountType:String,
   showBank:{type:Number,
   default:1
 }
@@ -65,5 +78,7 @@ const newSignupModel = new mongoose.model("Registration", newSignupShema);
 const signupModel = new mongoose.model("users", signupSchema);
 const AddBankModel = new mongoose.model("banks",AddBankSchema);
 const PaymentModel = new mongoose.model("payments",PaymentSchema);
+const AdminLoginModel = new mongoose.model("Admins", AdminLogin)
 
-module.exports = {newSignupModel,signupModel,otpModel, AddBankModel,PaymentModel};
+
+module.exports = {newSignupModel,signupModel,otpModel, AddBankModel,PaymentModel,AdminLoginModel};

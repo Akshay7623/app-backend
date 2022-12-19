@@ -1,9 +1,24 @@
 const { newSignupModel, signupModel } = require("../model/signupModel");
 const bcrypt = require("bcrypt");
 const Jwt = require("jsonwebtoken");
-const jwtKey = "MYKEY";
+const jwtKey = process.env.SIGN_UP_SECRET_KEY;
 const SubmitOtp = async (req, res, next) => {
+
+  if (typeof req.body.mobile === 'undefined' || typeof req.body.otp === 'undefined' ||typeof req.body.number === 'number') {
+    res.json({message:"INVALID_FORMAT"});
+    return;
+  }
+  if (req.body.mobile.length!==10) {
+    res.json({message:"INVALID_FORMAT"});
+    return;
+  }
+
   let data = await newSignupModel.findOne({ mobile: req.body.mobile });
+  
+  if (!data) {
+    res.json({message:"DATA_NOT_AVAILABLE"});
+    return;
+  }
   if (req.body.otp.length === 4 && data.otpCount < 5) {
     if (data) {
       if (data.otp == req.body.otp) {

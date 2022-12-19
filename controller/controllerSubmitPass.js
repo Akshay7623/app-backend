@@ -1,16 +1,27 @@
 const { signupModel, otpModel } = require("../model/signupModel");
 const bcrypt = require("bcrypt");
 const Jwt = require("jsonwebtoken");
-const jwtKey = "MYKEY";
+const jwtKey = process.env.ENTER_NEW_PASS_KEY;
 
 const ResetPass = async (req, res, next) => {
-  
-  const Bearer = req.headers.authorization;
+
+  const Bearer =  req.headers['authorization'];
+    if (!Bearer) {
+        res.json({message:"INVALID_DATA"});
+        return;
+    }
+  if (typeof req.body.newPassword === 'undefined') {
+        res.json({message:"INVALID_DATA"});
+        return;
+  }
+  if (req.body.newPassword.toString().length<6) {
+        res.json({message:"INVALID_DATA"});
+        return;
+  }
   const token = Bearer.split(" ")[1];
   const password = req.body.newPassword;
   Jwt.verify(token, jwtKey, (err, authData) => {
     if (err) {
-      console.log(err);
       res.json({ message: "INVALID_DATA", auth: false });
     } else {
       signupModel.findOne({ mobile: authData.mobile }).then((data) => {
